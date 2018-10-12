@@ -61,7 +61,7 @@ func (m *member) compile() {
 type parser struct {
 	agents      []*agent
 	withinGroup bool
-	items       []*lexeme
+	items       []*item
 	robots      robots
 }
 

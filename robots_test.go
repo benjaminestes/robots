@@ -1,24 +1,23 @@
 package robots
 
 import (
-	"fmt"
 	"os"
 	"testing"
 )
 
 // embed something interesting here.
-func TestRobots(t *testing.T) {
-	f, err := os.Open("testdata/pathological.txt")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
-	}
-	r, _ := From(f)
-	// TODO: Add interesting checks to pathological file
-	// fmt.Println(r.Test("Googlebot", "/images"))
-	// fmt.Println(r.Test("Googlebot", "/something.js"))
-	// fmt.Println(r.Test("Googlebot", "/exact-match"))
-	// fmt.Println(r.Test("Googlebot", "/"))
-}
+// func TestRobots(t *testing.T) {
+// 	f, err := os.Open("testdata/pathological.txt")
+// 	if err != nil {
+// 		fmt.Fprintf(os.Stderr, "%v", err)
+// 	}
+// 	r, _ := From(f)
+// 	// TODO: Add interesting checks to pathological file
+// 	// fmt.Println(r.Test("Googlebot", "/images"))
+// 	// fmt.Println(r.Test("Googlebot", "/something.js"))
+// 	// fmt.Println(r.Test("Googlebot", "/exact-match"))
+// 	// fmt.Println(r.Test("Googlebot", "/"))
+// }
 
 func TestAgentPrecedence(t *testing.T) {
 	fname := "testdata/agent_precedence.txt"

@@ -28,7 +28,7 @@ var fieldtypes = map[string]fieldtype{
 	"sitemap":    itemSitemap,
 }
 
-type lexeme struct {
+type item struct {
 	typ  fieldtype
 	val  string
 	line int
@@ -40,10 +40,10 @@ type lexer struct {
 	start int
 	pos   int
 	width int
-	items chan *lexeme
+	items chan *item
 }
 
-func (l *lexer) nextItem() *lexeme {
+func (l *lexer) nextItem() *item {
 	return <-l.items
 }
 
@@ -69,7 +69,7 @@ func (l *lexer) peek() rune {
 }
 
 func (l *lexer) emit() {
-	l.items <- &lexeme{
+	l.items <- &item{
 		typ: l.typ,
 		val: l.input[l.start:l.pos],
 	}
@@ -85,7 +85,7 @@ func (l *lexer) ignore() {
 // simply accept lines that are valid and silently discard those that
 // are not (even if received content is HTML).
 func (l *lexer) errorf(format string, args ...interface{}) {
-	l.items <- &lexeme{
+	l.items <- &item{
 		typ: itemError,
 		val: fmt.Sprintf(format, args...),
 	}
@@ -97,13 +97,13 @@ func (l *lexer) run() {
 	close(l.items)
 }
 
-func lex(in string) []*lexeme {
+func lex(in string) []*item {
 	l := &lexer{
 		input: in,
-		items: make(chan *lexeme),
+		items: make(chan *item),
 	}
 	go l.run()
-	items := []*lexeme{}
+	items := []*item{}
 	for item := l.nextItem(); item != nil; item = l.nextItem() {
 		items = append(items, item)
 	}
