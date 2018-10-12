@@ -27,9 +27,8 @@ var membertypes = map[string]membertype{
 }
 
 type item struct {
-	typ  membertype
-	val  string
-	line int
+	typ membertype
+	val string
 }
 
 type lexer struct {
@@ -128,7 +127,8 @@ func lexStart(l *lexer) lexfn {
 func lexField(l *lexer) lexfn {
 	for field, typ := range membertypes {
 		if len(l.input[l.start:]) < len(field) {
-			// Couldn't be a match.
+			// The remaining input is shorter than the
+			// field specifier.
 			continue
 		}
 		if strings.EqualFold(field, l.input[l.start:l.start+len(field)]) {
@@ -138,11 +138,14 @@ func lexField(l *lexer) lexfn {
 			return lexSep
 		}
 	}
-	// does this continue (as it should?)
+	// The input did not match a field. We emit an error and continue.
 	l.errorf("unexpected field type: %s", l.input[l.start:])
 	return lexNextLine
 }
 
+// If we're here, the beginning of this line did not match a
+// specifier, and therefore the rest of the line cannot match
+// anything.
 func lexNextLine(l *lexer) lexfn {
 	for c := l.next(); c != '\n' && c != eof; c = l.next() {
 	}
@@ -150,6 +153,7 @@ func lexNextLine(l *lexer) lexfn {
 	return lexStart
 }
 
+// Check for a separator, optionally with LWS on both sides.
 func lexSep(l *lexer) lexfn {
 	skipLWS(l)
 	if c := l.next(); c != ':' {
@@ -161,6 +165,8 @@ func lexSep(l *lexer) lexfn {
 }
 
 func lexValue(l *lexer) lexfn {
+	// Per Google's specification, a value can consist of any character
+	// other than a control character or '#'.
 	for c := l.next(); !isCTL(c) && c != '#' && c != eof; c = l.next() {
 	}
 	l.backup()
@@ -202,8 +208,10 @@ func lexEOL(l *lexer) lexfn {
 	return lexNextLine
 }
 
-// RFC 1945
-// http://www.ietf.org/rfc/rfc1945.txt
+// Control characters are defined in RFC 1945, so use that definition
+// instead of Unicode.
+//
+// See: http://www.ietf.org/rfc/rfc1945.txt
 func isCTL(r rune) bool {
 	if r < 32 || r == 127 {
 		return true
@@ -211,17 +219,27 @@ func isCTL(r rune) bool {
 	return false
 }
 
-// does this need to check for newline?
-func skipLWS(l *lexer) (more bool) {
+// LWS is defined in RFC 1945. "Linear whitespace" includes space and
+// tab characters, but optionally continues a logical line as long as
+// the continuation line starts with a space or tab.
+//
+// skipLWS advances the lexer past any LWS, whether or not it
+// folds. The fold return value specifies whether the LWS spanned a
+// fold. If fold is true, the next input is a logical continuation of
+// the previous line. If fold is false, the next character represents
+// the start of a new line of input.
+//
+// See: http://www.ietf.org/rfc/rfc1945.txt
+func skipLWS(l *lexer) (fold bool) {
 	afterEOL := false
-	more = true
+	fold = true
 	for c := l.next(); ; c = l.next() {
 		if c == '\n' {
 			afterEOL = true
 			continue
 		}
 		if afterEOL && !(c == ' ' || c == '\t') {
-			more = false
+			fold = false
 			break
 		}
 		if !unicode.IsSpace(c) {
@@ -229,8 +247,7 @@ func skipLWS(l *lexer) (more bool) {
 		}
 		afterEOL = false
 	}
-	// We've gone one rune too far.
 	l.backup()
 	l.ignore()
-	return more
+	return fold
 }
