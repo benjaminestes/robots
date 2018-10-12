@@ -1,62 +1,6 @@
 package robots
 
-import (
-	"fmt"
-	"regexp"
-	"sort"
-	"strings"
-)
-
-type member struct {
-	allow   bool
-	path    string
-	pattern *regexp.Regexp
-}
-
-func (m *member) match(path string) bool {
-	return m.pattern.MatchString(path)
-}
-
-type group []*member
-
-func (a *agent) match(name string) bool {
-	return a.pattern.MatchString(strings.ToLower(name))
-}
-
-type agent struct {
-	name    string
-	group   group
-	pattern *regexp.Regexp
-}
-
-func (a *agent) compile() {
-	pattern := regexp.QuoteMeta(a.name)
-	pattern = "^" + pattern // But with an added start-of-line
-	pattern = strings.Replace(pattern, `\*`, `.*`, -1)
-	pattern = strings.Replace(pattern, `\$`, `$`, -1)
-	// Names are case-insensitive
-	pattern = strings.ToLower(pattern)
-	// FIXME: What do I do in case of error?
-	r, err := regexp.Compile(pattern)
-	if err != nil {
-		fmt.Printf("oh no! %v\n", err)
-	}
-	a.pattern = r
-}
-
-// Following temoto's example.
-func (m *member) compile() {
-	pattern := regexp.QuoteMeta(m.path)
-	pattern = "^" + pattern // But with an added start-of-line
-	pattern = strings.Replace(pattern, `\*`, `.*`, -1)
-	pattern = strings.Replace(pattern, `\$`, `$`, -1)
-	// FIXME: What do I do in case of error?
-	r, err := regexp.Compile(pattern)
-	if err != nil {
-		fmt.Printf("oh no! %v\n", err)
-	}
-	m.pattern = r
-}
+import "sort"
 
 type parser struct {
 	agents      []*agent

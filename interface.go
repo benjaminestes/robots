@@ -10,8 +10,6 @@ import (
 	"golang.org/x/net/idna"
 )
 
-type robots []*agent
-
 func From(in io.Reader) (robots, error) {
 	buf, err := ioutil.ReadAll(in)
 	if err != nil {
@@ -52,34 +50,4 @@ func Locate(rawurl string) (string, error) {
 	u.Host = strings.ToLower(u.Host)
 	u.Scheme = strings.ToLower(u.Scheme)
 	return u.Scheme + "://" + u.Host + "/robots.txt", nil
-}
-
-func (r robots) Test(a, p string) bool {
-	return r.Tester(a)(p)
-}
-
-func (r robots) Tester(a string) func(string) bool {
-	agent, ok := r.bestAgent(a)
-	if !ok {
-		return func(_ string) bool {
-			return true
-		}
-	}
-	return func(path string) bool {
-		for _, member := range agent.group {
-			if member.match(path) {
-				return member.allow
-			}
-		}
-		return true
-	}
-}
-
-func (r robots) bestAgent(a string) (*agent, bool) {
-	for _, agent := range r {
-		if agent.match(a) {
-			return agent, true
-		}
-	}
-	return nil, false
 }
