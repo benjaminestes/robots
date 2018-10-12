@@ -28,6 +28,8 @@ func parseStart(p *parser) parsefn {
 		return parseDisallow
 	case itemAllow:
 		return parseAllow
+	case itemSitemap:
+		return parseSitemap
 	default:
 		return parseNext
 	}
@@ -83,4 +85,9 @@ func parseNext(p *parser) parsefn {
 func parseEnd(p *parser) parsefn {
 	p.robots.addAgents(p.agents)
 	return nil
+}
+
+func parseSitemap(p *parser) parsefn {
+	p.robots.Sitemaps = append(p.robots.Sitemaps, p.items[0].val)
+	return parseStart
 }

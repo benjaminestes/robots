@@ -49,8 +49,12 @@ type group struct {
 }
 
 func (g *group) addMember(m *member) {
+	// Maintain type invariant: a member must have its pattern
+	// compiled before use.
 	m.compile()
 	g.members = append(g.members, m)
+	// Maintain type invariant: the members of a group must always
+	// be sorted by length of path, descending.
 	sort.Slice(g.members, func(i, j int) bool {
 		return len(g.members[i].path) > len(g.members[j].path)
 	})
@@ -90,14 +94,18 @@ func (a *agent) compile() {
 	a.pattern = r
 }
 
-// Robots represents the result of parsing a robots file. It is
-// represented as an order list of agents. The agents occur in
-// descending order by length of name. This ensures that if we check
-// the agents sequentially, the first matching agent will be the
-// longest match as well.
+// Robots represents the result of parsing a robots.txt file. To test
+// whether, under the rules of that file, an agent should crawl a path,
+// use a Test* method. If an sitemaps were discovered in the robots.txt
+// file, their absolute URLs are in the Robots.Sitemaps field.
 type Robots struct {
+	// agents represents the groups of rules from a robots
+	// file. The agents occur in descending order by length of
+	// name. This ensures that if we check the agents
+	// sequentially, the first matching agent will be the longest
+	// match as well.
 	agents   []*agent
-	Sitemaps []string
+	Sitemaps []string // Absolute URLs of sitemaps in robots.txt.
 }
 
 // Test takes an agent string and a path string and checks whether the
@@ -114,6 +122,7 @@ func (r *Robots) Test(a, p string) bool {
 func (r *Robots) Tester(a string) func(p string) bool {
 	agent, ok := r.bestAgent(a)
 	if !ok {
+		// An agent that isn't matched crawls everything.
 		return func(_ string) bool {
 			return true
 		}
@@ -128,11 +137,19 @@ func (r *Robots) Tester(a string) func(p string) bool {
 	}
 }
 
+// addAgents adds a slice of agents to that maintained by r.
+// This function accepts a slice because that is the common case:
+// the parser may generate multiple agent objects from a single
+// group of rules.
 func (r *Robots) addAgents(agents []*agent) {
 	for _, agent := range agents {
+		// Maintain type invariant: all contained agents
+		// must have patterns compiled before use.
 		agent.compile()
 	}
 	r.agents = append(r.agents, agents...)
+	// Maintain type invariant: r.agents must always be sorted
+	// by length of agent name, descending.
 	sort.Slice(r.agents, func(i, j int) bool {
 		return len(r.agents[i].name) > len(r.agents[j].name)
 	})
