@@ -15,6 +15,12 @@ go get -u "github.com/benjaminestes/robots"
 import "github.com/benjaminestes/robots"
 ```
 
+## Use
+
+For usage and description, please see the documentation:
+
+https://godoc.org/github.com/benjaminestes/robots
+
 ## License
 
 MIT
