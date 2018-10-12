@@ -114,8 +114,8 @@ type Robots struct {
 // the named path.
 //
 // For details, see method Tester.
-func (r *Robots) Test(a, p string) bool {
-	return r.Tester(a)(p)
+func (r *Robots) Test(name, path string) bool {
+	return r.Tester(name)(path)
 }
 
 // Tester takes an agent string. It returns a predicate with a single
@@ -129,8 +129,8 @@ func (r *Robots) Test(a, p string) bool {
 // to the URL in question: the scheme and domain of the raw URL
 // will be discarded without warning. To ensure the Robots object
 // is applicable to the raw URL, use the Locate function.
-func (r *Robots) Tester(a string) func(p string) bool {
-	agent, ok := r.bestAgent(a)
+func (r *Robots) Tester(name string) func(path string) bool {
+	agent, ok := r.bestAgent(name)
 	if !ok {
 		// An agent that isn't matched crawls everything.
 		return func(_ string) bool {
@@ -173,9 +173,9 @@ func (r *Robots) addAgents(agents []*agent) {
 // bestAgent matches an agent string against all of the agents in
 // r. It returns a pointer to the best matching agent, and a boolen
 // indicating whether a match was found.
-func (r *Robots) bestAgent(a string) (*agent, bool) {
+func (r *Robots) bestAgent(name string) (*agent, bool) {
 	for _, agent := range r.agents {
-		if agent.match(a) {
+		if agent.match(name) {
 			return agent, true
 		}
 	}

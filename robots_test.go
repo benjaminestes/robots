@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestRobots(t *testing.T) {
+func TestPathological(t *testing.T) {
 	f, err := os.Open("testdata/pathological.txt")
 	if err != nil {
 		t.Errorf("%v", err)
