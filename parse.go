@@ -67,7 +67,8 @@ type parser struct {
 
 type parsefn func(p *parser) parsefn
 
-func parse(items []*lexeme) robots {
+func parse(s string) robots {
+	items := lex(s)
 	p := &parser{
 		items: items,
 	}

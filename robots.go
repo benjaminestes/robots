@@ -17,7 +17,7 @@ func From(in io.Reader) (robots, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parse(lex(string(buf))), nil
+	return parse(string(buf)), nil
 }
 
 func Locate(rawurl string) (string, error) {

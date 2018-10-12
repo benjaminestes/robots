@@ -13,10 +13,11 @@ func TestRobots(t *testing.T) {
 		fmt.Fprintf(os.Stderr, "%v", err)
 	}
 	r, _ := From(f)
-	fmt.Println(r.Test("Googlebot", "/images"))
-	fmt.Println(r.Test("Googlebot", "/something.js"))
-	fmt.Println(r.Test("Googlebot", "/exact-match"))
-	fmt.Println(r.Test("Googlebot", "/"))
+	// TODO: Add interesting checks to pathological file
+	// fmt.Println(r.Test("Googlebot", "/images"))
+	// fmt.Println(r.Test("Googlebot", "/something.js"))
+	// fmt.Println(r.Test("Googlebot", "/exact-match"))
+	// fmt.Println(r.Test("Googlebot", "/"))
 }
 
 func TestAgentPrecedence(t *testing.T) {
