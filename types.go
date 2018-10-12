@@ -2,6 +2,7 @@ package robots
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -111,6 +112,8 @@ type Robots struct {
 // Test takes an agent string and a path string and checks whether the
 // robots.txt file represented by r allows the named agent to crawl
 // the named path.
+//
+// For details, see method Tester.
 func (r *Robots) Test(a, p string) bool {
 	return r.Tester(a)(p)
 }
@@ -119,6 +122,13 @@ func (r *Robots) Test(a, p string) bool {
 // string argument representing a path. This predicate can be used to
 // check whether, under the robots.txt file represented by r, the
 // agent a can crawl the path p.
+//
+// Only the path component of the provided URL is used. Therefore,
+// input can be either an absolute or relative URL. It is the caller's
+// responsibility to ensure that the Robots object is applicable
+// to the URL in question: the scheme and domain of the raw URL
+// will be discarded without warning. To ensure the Robots object
+// is applicable to the raw URL, use the Locate function.
 func (r *Robots) Tester(a string) func(p string) bool {
 	agent, ok := r.bestAgent(a)
 	if !ok {
@@ -128,6 +138,11 @@ func (r *Robots) Tester(a string) func(p string) bool {
 		}
 	}
 	return func(path string) bool {
+		parsed, err := url.Parse(path)
+		if err != nil {
+			return true
+		}
+		path = parsed.Path
 		for _, member := range agent.group.members {
 			if member.match(path) {
 				return member.allow
