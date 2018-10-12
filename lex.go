@@ -69,7 +69,7 @@ func (l *lexer) peek() rune {
 func (l *lexer) emit() {
 	l.items <- &item{
 		typ: l.typ,
-		val: l.input[l.start:l.pos],
+		val: strings.TrimRightFunc(l.input[l.start:l.pos], unicode.IsSpace),
 	}
 	l.start = l.pos
 }
@@ -161,8 +161,7 @@ func lexSep(l *lexer) lexfn {
 }
 
 func lexValue(l *lexer) lexfn {
-	// TODO: I'm not sure if IsSpace is correct given the Google grammar.
-	for c := l.next(); !isCTL(c) && c != '#' && !unicode.IsSpace(c); c = l.next() {
+	for c := l.next(); !isCTL(c) && c != '#' && c != eof; c = l.next() {
 	}
 	l.backup()
 	l.emit()
