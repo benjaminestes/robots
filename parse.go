@@ -6,12 +6,12 @@ type parser struct {
 	agents      []*agent
 	withinGroup bool
 	items       []*item
-	robots      robots
+	robots      Robots
 }
 
 type parsefn func(p *parser) parsefn
 
-func parse(s string) robots {
+func parse(s string) Robots {
 	items := lex(s)
 	p := &parser{
 		items: items,

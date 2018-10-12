@@ -1,3 +1,6 @@
+// Package robots implements robots.txt file parsing and matching
+// based on Google's specification. Read the full specification at:
+// https://developers.google.com/search/reference/robots_txt.
 package robots
 
 import (
@@ -10,7 +13,14 @@ import (
 	"golang.org/x/net/idna"
 )
 
-func From(in io.Reader) (robots, error) {
+// From produces a Robots object from a robots.txt file represented as
+// an io.Reader.
+//
+// The attitude of the specification is permissive concerning parser
+// errors: all valid input is accepted, and invalid input is silently
+// rejected without failing. Therefore, From will only signal an error
+// condition if it fails to read from the input at all.
+func From(in io.Reader) (Robots, error) {
 	buf, err := ioutil.ReadAll(in)
 	if err != nil {
 		return nil, err
@@ -18,6 +28,13 @@ func From(in io.Reader) (robots, error) {
 	return parse(string(buf)), nil
 }
 
+// Locate takes a string representing an absolute URL and returns the
+// absolute URL of the robots.txt that would govern its crawlability
+// (assuming such a file exists).
+//
+// Locate covers all special cases of the specification, including
+// punycode domains, domain and protocol case-insensitivity, and
+// default ports for certain protocols.
 func Locate(rawurl string) (string, error) {
 	const (
 		httpPort  = ":80"
