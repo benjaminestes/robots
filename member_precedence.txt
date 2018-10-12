@@ -1,0 +1,8 @@
+user-agent: *
+allow: /p
+allow: /folder
+allow: /page
+allow: /$
+disallow: /folder
+disallow: /*.htm
+disallow: /

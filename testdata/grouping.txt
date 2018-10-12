@@ -1,0 +1,9 @@
+user-agent: a
+disallow: /c
+
+user-agent: b
+disallow: /d
+
+user-agent: e
+user-agent: f
+disallow: /g

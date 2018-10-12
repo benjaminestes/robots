@@ -1,0 +1,43 @@
+﻿Note to readers - according to Google:
+https://developers.google.com/search/reference/robots_txt
+
+... when parsing a robots.txt file, any valid lines of the file are to
+be accepted, and any invalid lines rejected. This is the case
+regardless of whether the robots.txt file is rendered in some
+unexpected format - most likely HTML. So this entire file should parse
+successfully.
+    ﻿
+<!-- <!DOCTYPE html> --> # is it HTML or not?
+     disallow:/ #woah######
+<html lang="en">
+  <head>
+user-agent
+  : Googlebot # obviously
+user-agent: Bingbot
+        disallow: /    
+
+disallow:
+      /exact-match$
+
+<body>
+sitemap : 
+   https://www.example.com/
+allow: /
+
+<p > # an ignored comment??
+         #another ignored comment?
+
+  hhhhhhhh
+
+  DISALLOW: /
+  alLow: /*.js#wildcard!
+
+        é
+              
+  user-agent: * #everyone else lol
+  <img src="disallow">disallow: /images</img>
+  Allow: /images
+  disAllow: /
+</html>
+
+allow:/images/my-cool-image.png
