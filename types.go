@@ -3,6 +3,7 @@ package robots
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -43,7 +44,17 @@ func (m *member) compile() {
 // longest path to shortest path. This allows efficient matching of
 // paths to members: when evaluated sequentially, the first match must
 // be the longest.
-type group []*member
+type group struct {
+	members []*member
+}
+
+func (g *group) addMember(m *member) {
+	m.compile()
+	g.members = append(g.members, m)
+	sort.Slice(g.members, func(i, j int) bool {
+		return len(g.members[i].path) > len(g.members[j].path)
+	})
+}
 
 // An agent represents a group of rules that a named robots agent
 // might match. Its compile() method must be called prior to use.
@@ -84,12 +95,15 @@ func (a *agent) compile() {
 // descending order by length of name. This ensures that if we check
 // the agents sequentially, the first matching agent will be the
 // longest match as well.
-type Robots []*agent
+type Robots struct {
+	agents   []*agent
+	Sitemaps []string
+}
 
 // Test takes an agent string and a path string and checks whether the
 // robots.txt file represented by r allows the named agent to crawl
 // the named path.
-func (r Robots) Test(a, p string) bool {
+func (r *Robots) Test(a, p string) bool {
 	return r.Tester(a)(p)
 }
 
@@ -97,7 +111,7 @@ func (r Robots) Test(a, p string) bool {
 // string argument representing a path. This predicate can be used to
 // check whether, under the robots.txt file represented by r, the
 // agent a can crawl the path p.
-func (r Robots) Tester(a string) func(p string) bool {
+func (r *Robots) Tester(a string) func(p string) bool {
 	agent, ok := r.bestAgent(a)
 	if !ok {
 		return func(_ string) bool {
@@ -105,7 +119,7 @@ func (r Robots) Tester(a string) func(p string) bool {
 		}
 	}
 	return func(path string) bool {
-		for _, member := range agent.group {
+		for _, member := range agent.group.members {
 			if member.match(path) {
 				return member.allow
 			}
@@ -114,11 +128,21 @@ func (r Robots) Tester(a string) func(p string) bool {
 	}
 }
 
+func (r *Robots) addAgents(agents []*agent) {
+	for _, agent := range agents {
+		agent.compile()
+	}
+	r.agents = append(r.agents, agents...)
+	sort.Slice(r.agents, func(i, j int) bool {
+		return len(r.agents[i].name) > len(r.agents[j].name)
+	})
+}
+
 // bestAgent matches an agent string against all of the agents in
 // r. It returns a pointer to the best matching agent, and a boolen
 // indicating whether a match was found.
-func (r Robots) bestAgent(a string) (*agent, bool) {
-	for _, agent := range r {
+func (r *Robots) bestAgent(a string) (*agent, bool) {
+	for _, agent := range r.agents {
 		if agent.match(a) {
 			return agent, true
 		}

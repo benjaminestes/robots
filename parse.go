@@ -1,20 +1,19 @@
 package robots
 
-import "sort"
-
 type parser struct {
 	agents      []*agent
 	withinGroup bool
 	items       []*item
-	robots      Robots
+	robots      *Robots
 }
 
 type parsefn func(p *parser) parsefn
 
-func parse(s string) Robots {
+func parse(s string) *Robots {
 	items := lex(s)
 	p := &parser{
-		items: items,
+		items:  items,
+		robots: &Robots{},
 	}
 	for fn := parseStart; fn != nil; fn = fn(p) {
 	}
@@ -36,7 +35,7 @@ func parseStart(p *parser) parsefn {
 
 func parseUserAgent(p *parser) parsefn {
 	if p.withinGroup {
-		p.appendAgents()
+		p.robots.addAgents(p.agents)
 		p.agents = nil
 		p.agents = append(p.agents, &agent{
 			name: p.items[0].val,
@@ -50,13 +49,6 @@ func parseUserAgent(p *parser) parsefn {
 	return parseNext
 }
 
-func (p *parser) appendAgents() {
-	p.robots = append(p.robots, p.agents...)
-	sort.Slice(p.robots, func(i, j int) bool {
-		return len(p.robots[i].name) > len(p.robots[j].name)
-	})
-}
-
 func parseDisallow(p *parser) parsefn {
 	p.withinGroup = true
 	for _, agent := range p.agents {
@@ -64,11 +56,7 @@ func parseDisallow(p *parser) parsefn {
 			allow: false,
 			path:  p.items[0].val,
 		}
-		m.compile()
-		agent.group = append(agent.group, m)
-		sort.Slice(agent.group, func(i, j int) bool {
-			return len(agent.group[i].path) > len(agent.group[j].path)
-		})
+		agent.group.addMember(m)
 	}
 	return parseNext
 }
@@ -80,11 +68,7 @@ func parseAllow(p *parser) parsefn {
 			allow: true,
 			path:  p.items[0].val,
 		}
-		m.compile()
-		agent.group = append(agent.group, m)
-		sort.Slice(agent.group, func(i, j int) bool {
-			return len(agent.group[i].path) > len(agent.group[j].path)
-		})
+		agent.group.addMember(m)
 	}
 	return parseNext
 }
@@ -98,12 +82,6 @@ func parseNext(p *parser) parsefn {
 }
 
 func parseEnd(p *parser) parsefn {
-	p.appendAgents()
-	sort.Slice(p.robots, func(i, j int) bool {
-		return len(p.robots[i].name) > len(p.robots[j].name)
-	})
-	for _, agent := range p.robots {
-		agent.compile()
-	}
+	p.robots.addAgents(p.agents)
 	return nil
 }

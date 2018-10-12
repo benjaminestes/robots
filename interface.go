@@ -20,7 +20,7 @@ import (
 // errors: all valid input is accepted, and invalid input is silently
 // rejected without failing. Therefore, From will only signal an error
 // condition if it fails to read from the input at all.
-func From(in io.Reader) (Robots, error) {
+func From(in io.Reader) (*Robots, error) {
 	buf, err := ioutil.ReadAll(in)
 	if err != nil {
 		return nil, err
