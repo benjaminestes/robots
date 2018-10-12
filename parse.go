@@ -49,28 +49,27 @@ func parseUserAgent(p *parser) parsefn {
 	return parseNext
 }
 
-func parseDisallow(p *parser) parsefn {
-	p.withinGroup = true
-	for _, agent := range p.agents {
-		m := &member{
-			allow: false,
-			path:  p.items[0].val,
+func makeParseMember(allow bool) func(*parser) parsefn {
+	return func(p *parser) parsefn {
+		p.withinGroup = true
+		for _, agent := range p.agents {
+			m := &member{
+				allow: allow,
+				path:  p.items[0].val,
+			}
+			agent.group.addMember(m)
 		}
-		agent.group.addMember(m)
+		return parseNext
 	}
-	return parseNext
 }
 
-func parseAllow(p *parser) parsefn {
-	p.withinGroup = true
-	for _, agent := range p.agents {
-		m := &member{
-			allow: true,
-			path:  p.items[0].val,
-		}
-		agent.group.addMember(m)
-	}
-	return parseNext
+var parseDisallow parsefn
+
+var parseAllow parsefn
+
+func init() {
+	parseDisallow = makeParseMember(false)
+	parseAllow = makeParseMember(true)
 }
 
 func parseNext(p *parser) parsefn {
