@@ -10,9 +10,8 @@ type parser struct {
 type parsefn func(p *parser) parsefn
 
 func parse(s string) *Robots {
-	items := lex(s)
 	p := &parser{
-		items:  items,
+		items:  lex(s),
 		robots: &Robots{},
 	}
 	for fn := parseStart; fn != nil; fn = fn(p) {
@@ -35,25 +34,42 @@ func parseStart(p *parser) parsefn {
 	}
 }
 
+// parseUserAgent handles two important cases. First, if we are within
+// a group of rules already, a user-agent rule causes a new group to
+// begin.  Second, if we're starting a new group (i.e., the previous
+// rule was also a user-agent rule and we're associating another agent
+// with the forthcoming group) then we add another agent to p.agents.
 func parseUserAgent(p *parser) parsefn {
-	if p.withinGroup {
+	if p.withinGroup { // The previous rule was allow or disallow
 		p.robots.addAgents(p.agents)
-		p.agents = nil
-		p.agents = append(p.agents, &agent{
-			name: p.items[0].val,
-		})
-		p.withinGroup = false
+		p.agents = []*agent{
+			&agent{
+				name: p.items[0].val,
+			},
+		}
+		p.withinGroup = false // Now we're before the start of a group
 		return parseNext
 	}
+	// The previous rule was another user-agent rule
 	p.agents = append(p.agents, &agent{
 		name: p.items[0].val,
 	})
 	return parseNext
 }
 
+// parseAllow and parseDisallow are identical except for what they set
+// the allow field of the member to. Therefore, we have this factory
+// function.
 func makeParseMember(allow bool) func(*parser) parsefn {
 	return func(p *parser) parsefn {
+		// Note that we set withinGroup to true even if we're
+		// evaluating allow/disallow rules that come before
+		// any user-agent rules. That's fine, it results in
+		// the desired behavior.
 		p.withinGroup = true
+		// If there is no agent (i.e., the rules come before
+		// any user-agent line), this just doesn't do
+		// anything.  That's what we want.
 		for _, agent := range p.agents {
 			m := &member{
 				allow: allow,
@@ -70,8 +86,17 @@ var parseDisallow parsefn
 var parseAllow parsefn
 
 func init() {
+	// These variables must be initiated at run-time to avoid a
+	// definition loop.
 	parseDisallow = makeParseMember(false)
 	parseAllow = makeParseMember(true)
+}
+
+func parseSitemap(p *parser) parsefn {
+	// sitemap rules are global: they do not affect whether we are
+	// in a group or not.
+	p.robots.Sitemaps = append(p.robots.Sitemaps, p.items[0].val)
+	return parseNext
 }
 
 func parseNext(p *parser) parsefn {
@@ -85,9 +110,4 @@ func parseNext(p *parser) parsefn {
 func parseEnd(p *parser) parsefn {
 	p.robots.addAgents(p.agents)
 	return nil
-}
-
-func parseSitemap(p *parser) parsefn {
-	p.robots.Sitemaps = append(p.robots.Sitemaps, p.items[0].val)
-	return parseNext
 }
