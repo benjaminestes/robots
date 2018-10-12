@@ -7,10 +7,10 @@ import (
 	"unicode/utf8"
 )
 
-type fieldtype int
+type membertype int
 
 const (
-	itemError = fieldtype(iota)
+	itemError = membertype(iota)
 	itemUserAgent
 	itemDisallow
 	itemAllow
@@ -19,7 +19,7 @@ const (
 
 const eof = -1
 
-var fieldtypes = map[string]fieldtype{
+var membertypes = map[string]membertype{
 	"user-agent": itemUserAgent,
 	"disallow":   itemDisallow,
 	"allow":      itemAllow,
@@ -27,13 +27,13 @@ var fieldtypes = map[string]fieldtype{
 }
 
 type item struct {
-	typ  fieldtype
+	typ  membertype
 	val  string
 	line int
 }
 
 type lexer struct {
-	typ   fieldtype
+	typ   membertype
 	input string
 	start int
 	pos   int
@@ -126,7 +126,7 @@ func lexStart(l *lexer) lexfn {
 }
 
 func lexField(l *lexer) lexfn {
-	for field, typ := range fieldtypes {
+	for field, typ := range membertypes {
 		if len(l.input[l.start:]) < len(field) {
 			// Couldn't be a match.
 			continue
