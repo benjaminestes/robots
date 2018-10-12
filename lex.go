@@ -110,28 +110,6 @@ func lex(in string) []*item {
 	return items
 }
 
-func (l *lexer) acceptNotIn(invalid string) bool {
-	if strings.ContainsRune(invalid, l.next()) {
-		return false
-	}
-	l.backup()
-	return true
-}
-
-func (l *lexer) accept(valid string) bool {
-	if strings.ContainsRune(valid, l.next()) {
-		return true
-	}
-	l.backup()
-	return false
-}
-
-func (l *lexer) acceptRun(valid string) {
-	for strings.ContainsRune(valid, l.next()) {
-	}
-	l.backup()
-}
-
 type lexfn func(*lexer) lexfn
 
 func lexStart(l *lexer) lexfn {
