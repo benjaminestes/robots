@@ -1,14 +1,16 @@
-package robots
+package robots_test
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/benjaminestes/robots"
 )
 
 func ExampleRobots() {
-	robotsURL := robots.Locate("https://www.example.com/page.html")
+	robotsURL, err := robots.Locate("https://www.example.com/page.html")
+	if err != nil {
+		// Handle error - couldn't parse input URL.
+	}
 
 	resp, err := http.Get(robotsURL)
 	if err != nil {
@@ -16,20 +18,34 @@ func ExampleRobots() {
 	}
 	defer resp.Body.Close()
 
-	r := robots.From(resp.Body)
+	r, err := robots.From(resp.Body)
+	if err != nil {
+		// Handle error - couldn't read from input.
+	}
+
 	if r.Test("Googlebot", "/") {
-		// You're good to crawl.
+		// You're good to crawl "/".
 	}
 	if r.Tester("Gooblebot")("/page.html") {
-		// You're good to crawl.
+		// You're good to crawl "/page.html".
 	}
 
 	for _, sitemap := range r.Sitemaps {
-		// Check that sitemap URL is in scope of the robots.txt file
-		// we used.
-		if r.Locate(sitemap) == robotsURL && r.Test("Googlebot", sitemap) {
+		// As the caller, we are responsible for ensuring that
+		// the sitemap URL is in scope of the robots.txt file
+		// we used before we try to access it.
+		sitemapRobotsURL, err := robots.Locate(sitemap)
+		if err != nil {
+			// Couldn't parse sitemap URL - probably we should skip.
+			continue
+		}
+		if sitemapRobotsURL == robotsURL && r.Test("Googlebot", sitemap) {
 			resp, err := http.Get(sitemap)
-			// ...check errors, do something with sitemap, close resp.
+			if err != nil {
+				// Handle error.
+			}
+			defer resp.Body.Close()
+			// ...do something with sitemap.
 		}
 	}
 }
