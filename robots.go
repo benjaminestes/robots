@@ -1,6 +1,7 @@
 package robots
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/url"
@@ -19,14 +20,21 @@ func From(in io.Reader) (robots, error) {
 	return parse(lex(string(buf))), nil
 }
 
-func Locate(rawurl string) string {
+func Locate(rawurl string) (string, error) {
 	const (
 		httpPort  = ":80"
 		httpsPort = ":443"
 		ftpPort   = ":21"
 	)
-	// FIXME: Handle error
-	u, _ := url.Parse(rawurl)
+
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		return "", err
+	}
+	if !u.IsAbs() {
+		return "", fmt.Errorf("expected absolute URL, got: %s", rawurl)
+	}
+
 	switch {
 	// do these need to be case-insensitive?
 	case u.Scheme == "http" && strings.HasSuffix(u.Host, httpPort):
@@ -41,7 +49,9 @@ func Locate(rawurl string) string {
 	}
 	// FIXME: Deal with error
 	u.Host, _ = idna.ToUnicode(u.Host)
-	return u.Scheme + "://" + u.Host + "/robots.txt"
+	u.Host = strings.ToLower(u.Host)
+	u.Scheme = strings.ToLower(u.Scheme)
+	return u.Scheme + "://" + u.Host + "/robots.txt", nil
 }
 
 func (r robots) Test(a, p string) bool {

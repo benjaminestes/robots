@@ -209,14 +209,30 @@ func TestLocate(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		rpath, _ := Locate(test.path)
 		if test.want {
-			if got := Locate(test.path) == test.robots; !got {
+			if got := rpath == test.robots; !got {
 				t.Errorf("Locate(%q) should be %v", test.path, test.robots)
 			}
 		} else {
-			if got := Locate(test.path) == test.robots; got {
+			if got := rpath == test.robots; got {
 				t.Errorf("Locate(%q) should not be %v", test.path, test.robots)
 			}
+		}
+	}
+}
+
+func TestLocateCase(t *testing.T) {
+	var tests = []struct {
+		input string
+		want  string
+	}{
+		{"hTtP://eXamPle.cOm:1234/somefile.html", "http://example.com:1234/robots.txt"},
+	}
+
+	for _, test := range tests {
+		if got, _ := Locate(test.input); got != test.want {
+			t.Errorf("Locate(%q) should be %v, got %v", test.input, test.want, got)
 		}
 	}
 }
