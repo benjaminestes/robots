@@ -8,7 +8,7 @@ import (
 
 // embed something interesting here.
 func TestRobots(t *testing.T) {
-	f, err := os.Open("pathological.txt")
+	f, err := os.Open("testdata/pathological.txt")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 	}
