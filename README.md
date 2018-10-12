@@ -17,4 +17,4 @@ import "github.com/benjaminestes/robots"
 
 ## License
 
-MIT.
+MIT
