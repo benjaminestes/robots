@@ -113,9 +113,9 @@ type Robots struct {
 // robots.txt file represented by r allows the named agent to crawl
 // the named path.
 //
-// For details, see method Tester.
-func (r *Robots) Test(name, path string) bool {
-	return r.Tester(name)(path)
+// Only the path of rawurl is used. For details, see method Tester.
+func (r *Robots) Test(name, rawurl string) bool {
+	return r.Tester(name)(rawurl)
 }
 
 // Tester takes an agent string. It returns a predicate with a single
@@ -129,7 +129,7 @@ func (r *Robots) Test(name, path string) bool {
 // to the URL in question: the scheme and domain of the raw URL
 // will be discarded without warning. To ensure the Robots object
 // is applicable to the raw URL, use the Locate function.
-func (r *Robots) Tester(name string) func(path string) bool {
+func (r *Robots) Tester(name string) func(rawurl string) bool {
 	agent, ok := r.bestAgent(name)
 	if !ok {
 		// An agent that isn't matched crawls everything.
@@ -137,12 +137,12 @@ func (r *Robots) Tester(name string) func(path string) bool {
 			return true
 		}
 	}
-	return func(path string) bool {
-		parsed, err := url.Parse(path)
+	return func(rawurl string) bool {
+		parsed, err := url.Parse(rawurl)
 		if err != nil {
 			return true
 		}
-		path = parsed.Path
+		path := parsed.Path
 		for _, member := range agent.group.members {
 			if member.match(path) {
 				return member.allow
