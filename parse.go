@@ -89,5 +89,5 @@ func parseEnd(p *parser) parsefn {
 
 func parseSitemap(p *parser) parsefn {
 	p.robots.Sitemaps = append(p.robots.Sitemaps, p.items[0].val)
-	return parseStart
+	return parseNext
 }

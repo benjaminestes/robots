@@ -14,8 +14,6 @@ const (
 	itemUserAgent
 	itemDisallow
 	itemAllow
-	// Anything > ignored the parser can choose to pass over.
-	itemIgnored
 	itemSitemap
 )
 
