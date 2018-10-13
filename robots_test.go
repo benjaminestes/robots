@@ -10,12 +10,12 @@ func TestPathological(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	r, _ := From(f)
+	r, _ := From(200, f)
 	if r.Test("Googlebot", "/exact-match") {
 		t.Errorf("googlebot shouldn't crawl /exact-match")
 	}
 	seen := false
-	for _, s := range r.Sitemaps {
+	for _, s := range r.Sitemaps() {
 		if s == "http://www.example.com/sitemap.xml" {
 			seen = true
 		}
@@ -42,7 +42,7 @@ func TestAgentPrecedence(t *testing.T) {
 		{"Bingbot", "*"},
 	}
 
-	r, err := From(data)
+	r, err := From(200, data)
 	if err != nil {
 		t.Errorf("couldn't read from test data %s", fname)
 	}
@@ -80,7 +80,7 @@ func TestGrouping(t *testing.T) {
 		{"f", "/g", false},
 	}
 
-	r, err := From(data)
+	r, err := From(200, data)
 	if err != nil {
 		t.Errorf("couldn't read from test data %s", fname)
 	}
@@ -178,7 +178,7 @@ func TestMemberPrecedence(t *testing.T) {
 		{"/", true},
 	}
 
-	r, err := From(data)
+	r, err := From(200, data)
 	if err != nil {
 		t.Errorf("couldn't read from test data %s", fname)
 	}

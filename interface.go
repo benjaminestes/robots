@@ -52,12 +52,14 @@ import (
 // errors: all valid input is accepted, and invalid input is silently
 // rejected without failing. Therefore, From will only signal an error
 // condition if it fails to read from the input at all.
-func From(in io.Reader) (*Robots, error) {
+func From(status int, in io.Reader) (*Robots, error) {
 	buf, err := ioutil.ReadAll(in)
 	if err != nil {
 		return nil, err
 	}
-	return parse(string(buf)), nil
+	data := parse(string(buf))
+	r := &Robots{status, data}
+	return r, nil
 }
 
 // Locate takes a string representing an absolute URL and returns the

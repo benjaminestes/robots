@@ -100,14 +100,24 @@ func (a *agent) compile() {
 // whether an agent may crawl a path, use a Test* method. If any
 // sitemaps were discovered while parsing, the Sitemaps field will be
 // a slice containing their absolute URLs.
-type Robots struct {
+type robotsdata struct {
 	// agents represents the groups of rules from a robots
 	// file. The agents occur in descending order by length of
 	// name. This ensures that if we check the agents
 	// sequentially, the first matching agent will be the longest
 	// match as well.
 	agents   []*agent
-	Sitemaps []string // Absolute URLs of sitemaps in robots.txt.
+	sitemaps []string // Absolute URLs of sitemaps in robots.txt.
+}
+
+type Robots struct {
+	status int
+	*robotsdata
+}
+
+func (r *Robots) Sitemaps() []string {
+	// TODO: Does this need to be immutable?
+	return r.sitemaps
 }
 
 // Test takes an agent string and a rawurl string and checks whether the
@@ -155,7 +165,7 @@ func (r *Robots) Tester(name string) func(rawurl string) bool {
 // This function accepts a slice because that is the common case:
 // the parser may generate multiple agent objects from a single
 // group of rules.
-func (r *Robots) addAgents(agents []*agent) {
+func (r *robotsdata) addAgents(agents []*agent) {
 	for _, agent := range agents {
 		// Maintain type invariant: all contained agents
 		// must have patterns compiled before use.
@@ -172,7 +182,7 @@ func (r *Robots) addAgents(agents []*agent) {
 // bestAgent matches an agent string against all of the agents in
 // r. It returns a pointer to the best matching agent, and a boolen
 // indicating whether a match was found.
-func (r *Robots) bestAgent(name string) (*agent, bool) {
+func (r *robotsdata) bestAgent(name string) (*agent, bool) {
 	for _, agent := range r.agents {
 		if agent.match(name) {
 			return agent, true

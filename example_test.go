@@ -18,7 +18,7 @@ func ExampleRobots() {
 	}
 	defer resp.Body.Close()
 
-	r, err := robots.From(resp.Body)
+	r, err := robots.From(200, resp.Body)
 	if err != nil {
 		// Handle error - couldn't read from input.
 	}
@@ -30,7 +30,7 @@ func ExampleRobots() {
 		// You're good to crawl "/page.html".
 	}
 
-	for _, sitemap := range r.Sitemaps {
+	for _, sitemap := range r.Sitemaps() {
 		// As the caller, we are responsible for ensuring that
 		// the sitemap URL is in scope of the robots.txt file
 		// we used before we try to access it.

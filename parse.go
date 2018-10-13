@@ -4,19 +4,19 @@ type parser struct {
 	agents      []*agent
 	withinGroup bool
 	items       []*item
-	robots      *Robots
+	robotsdata  *robotsdata
 }
 
 type parsefn func(p *parser) parsefn
 
-func parse(s string) *Robots {
+func parse(s string) *robotsdata {
 	p := &parser{
-		items:  lex(s),
-		robots: &Robots{},
+		items:      lex(s),
+		robotsdata: &robotsdata{},
 	}
 	for fn := parseStart; fn != nil; fn = fn(p) {
 	}
-	return p.robots
+	return p.robotsdata
 }
 
 func parseStart(p *parser) parsefn {
@@ -41,7 +41,7 @@ func parseStart(p *parser) parsefn {
 // with the forthcoming group) then we add another agent to p.agents.
 func parseUserAgent(p *parser) parsefn {
 	if p.withinGroup { // The previous rule was allow or disallow
-		p.robots.addAgents(p.agents)
+		p.robotsdata.addAgents(p.agents)
 		p.agents = []*agent{
 			&agent{
 				name: p.items[0].val,
@@ -95,7 +95,7 @@ func init() {
 func parseSitemap(p *parser) parsefn {
 	// sitemap rules are global: they do not affect whether we are
 	// in a group or not.
-	p.robots.Sitemaps = append(p.robots.Sitemaps, p.items[0].val)
+	p.robotsdata.sitemaps = append(p.robotsdata.sitemaps, p.items[0].val)
 	return parseNext
 }
 
@@ -108,6 +108,6 @@ func parseNext(p *parser) parsefn {
 }
 
 func parseEnd(p *parser) parsefn {
-	p.robots.addAgents(p.agents)
+	p.robotsdata.addAgents(p.agents)
 	return nil
 }
