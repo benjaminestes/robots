@@ -7,6 +7,12 @@ import (
 	"unicode/utf8"
 )
 
+// The lexer in this file is based on the model presented by Rob Pike.
+// There are important amendments and subtractions, but the model is
+// his work.
+//
+// https://www.youtube.com/watch?v=HxaD_trXwRE
+
 type membertype int
 
 const (

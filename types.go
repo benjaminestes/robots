@@ -28,7 +28,8 @@ func (m *member) match(path string) bool {
 // $. compile() compiles the given path to a regular expression
 // denoting the patterns we will accept.
 func (m *member) compile() {
-	// Following temoto's example.
+	// This approach to handling matches is derived from temoto's:
+	// https://github.com/temoto/robotstxt/blob/master/parser.go
 	pattern := regexp.QuoteMeta(m.path)
 	pattern = "^" + pattern // But with an added start-of-line
 	pattern = strings.Replace(pattern, `\*`, `.*`, -1)
