@@ -1,26 +1,39 @@
-// Package robots implements robots.txt file parsing and matching
-// based on Google's specification. Read the full specification at:
+// Package robots implements robots.txt parsing and matching based on
+// Google's specification. If you need a robots.txt primer, please
+// read the full specification at:
 // https://developers.google.com/search/reference/robots_txt.
 //
-// This specification assumes crawling a path is allowed by
-// default. For both user agent and path matching, the longest match
-// wins. For exampke, "/path" has precedence over "/". Path matches
-// are case-sensitive; user agent matches are not. Acceptable
-// metacharacters in paths specified by allow/disallow rules are "*" and
-// "$". "*" matches anything, and "$" matches the end of a path. Metacharacters
-// are not used in user agent matching. As a special case, a user agent
-// pattern "*" matches any user agent.
+// What you need to think about
 //
-// A generous parser is specified. Any line representing valid input
-// is used, any invalid line is silently discarded. This is true even
-// if the content parsed is in some unexpected format, like HTML.
+// Clients of this package have one obligation: when testing whether a
+// URL can be crawled, you must use the correct robots.txt file. The
+// specification uses scheme, port, and punycode variations to define
+// which URLs are in the scope of a given robots.txt file.
 //
-// The rules for choosing which robots.txt file applies to a given URL
-// are well-defined, and somewhat complex. Use Locate to get the URL
-// of a robots.txt file that applies to a specific URL, and to any
-// other URL whose crawling would be governed by that robots.txt file.
-// It is the caller's responsibility to make sure you use the correct
-// Robots object for a path; with Locate this should be easy.
+// To get the right robots.txt file, use Locate. Locate takes as its
+// only argument the URL you want to access. It returns the URL of the
+// robots.txt file that governs access to it. Locate will always
+// return a single unique robots.txt location for all URLs sharing a
+// scope.
+//
+// In practice, a client pattern for testing whether a URL is
+// accessible would be: a) Locate the robots.txt file for the URL; b)
+// Check whether you have fetched data for that robots.txt file; c) If
+// yes, use the data to Test the URL against your user agent. If no,
+// fetch the robots.txt data and try again.
+//
+// For complete details, see "File location & range of validity" in
+// the specification:
+// https://developers.google.com/search/reference/robots_txt#file-location--range-of-validity.
+//
+// How bad input is handled
+//
+// A generous parser is specified. Any valid line is accepted; any
+// invalid line is silently discarded. This is true even if the
+// content parsed is in an unexpected format, like HTML.
+//
+// For complete details, see "File format" in the specification:
+// https://developers.google.com/search/reference/robots_txt#file-format
 package robots
 
 import (
