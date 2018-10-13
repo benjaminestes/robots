@@ -66,7 +66,8 @@ func From(in io.Reader) (*Robots, error) {
 //
 // Locate covers all special cases of the specification, including
 // punycode domains, domain and protocol case-insensitivity, and
-// default ports for certain protocols.
+// default ports for certain protocols. It is guaranteed to produce
+// the same robots.txt URL for any input URLs that share a scope.
 func Locate(rawurl string) (string, error) {
 	const (
 		httpPort  = ":80"

@@ -97,9 +97,9 @@ func (a *agent) compile() {
 }
 
 // Robots represents the result of parsing a robots.txt file. To test
-// whether, under the rules of that file, an agent should crawl a path,
-// use a Test* method. If an sitemaps were discovered in the robots.txt
-// file, their absolute URLs are in the Robots.Sitemaps field.
+// whether an agent may crawl a path, use a Test* method. If any
+// sitemaps were discovered while parsing, the Sitemaps field will be
+// a slice containing their absolute URLs.
 type Robots struct {
 	// agents represents the groups of rules from a robots
 	// file. The agents occur in descending order by length of
@@ -110,26 +110,24 @@ type Robots struct {
 	Sitemaps []string // Absolute URLs of sitemaps in robots.txt.
 }
 
-// Test takes an agent string and a path string and checks whether the
-// robots.txt file represented by r allows the named agent to crawl
-// the named path.
+// Test takes an agent string and a rawurl string and checks whether the
+// r allows name to access the path component of rawurl.
 //
 // Only the path of rawurl is used. For details, see method Tester.
 func (r *Robots) Test(name, rawurl string) bool {
 	return r.Tester(name)(rawurl)
 }
 
-// Tester takes an agent string. It returns a predicate with a single
-// string argument representing a path. This predicate can be used to
-// check whether, under the robots.txt file represented by r, the
-// agent a can crawl the path p.
+// Tester takes string naming a user agent. It returns a predicate
+// with a single string parameter representing a URL. This predicate
+// can be used to check whether r allows name to crawl the path
+// component of rawurl.
 //
-// Only the path component of the provided URL is used. Therefore,
-// input can be either an absolute or relative URL. It is the caller's
-// responsibility to ensure that the Robots object is applicable
-// to the URL in question: the scheme and domain of the raw URL
-// will be discarded without warning. To ensure the Robots object
-// is applicable to the raw URL, use the Locate function.
+// Only the path part of rawurl is considered. Therefore, rawurl can
+// be absolute or relative. It is the caller's responsibility to
+// ensure that the Robots object is applicable to rawurl: no error can
+// be provided if this is not the case. To ensure the Robots object is
+// applicable to rawurl, use the Locate function.
 func (r *Robots) Tester(name string) func(rawurl string) bool {
 	agent, ok := r.bestAgent(name)
 	if !ok {
