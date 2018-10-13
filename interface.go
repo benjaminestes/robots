@@ -8,7 +8,7 @@
 // Clients of this package have one obligation: when testing whether a
 // URL can be crawled, use the correct robots.txt file. The
 // specification uses scheme, port, and punycode variations to define
-// which URLs are in the scope of a given robots.txt file.
+// which URLs are in scope.
 //
 // To get the right robots.txt file, use Locate. Locate takes as its
 // only argument the URL you want to access. It returns the URL of the
