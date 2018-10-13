@@ -1,12 +1,12 @@
 // Package robots implements robots.txt parsing and matching based on
-// Google's specification. If you need a robots.txt primer, please
-// read the full specification at:
+// Google's specification. For a robots.txt primer, please read the
+// full specification at:
 // https://developers.google.com/search/reference/robots_txt.
 //
-// What you need to think about
+// What clients need to think about
 //
 // Clients of this package have one obligation: when testing whether a
-// URL can be crawled, you must use the correct robots.txt file. The
+// URL can be crawled, use the correct robots.txt file. The
 // specification uses scheme, port, and punycode variations to define
 // which URLs are in the scope of a given robots.txt file.
 //
@@ -21,17 +21,17 @@
 // yes, use the data to Test the URL against your user agent; d) if
 // no, fetch the robots.txt data and try again.
 //
-// For complete details, see "File location & range of validity" in
-// the specification:
+// For details, see "File location & range of validity" in the
+// specification:
 // https://developers.google.com/search/reference/robots_txt#file-location--range-of-validity.
 //
 // How bad input is handled
 //
-// A generous parser is specified. Any valid line is accepted; any
+// A generous parser is specified. A valid line is accepted, and an
 // invalid line is silently discarded. This is true even if the
 // content parsed is in an unexpected format, like HTML.
 //
-// For complete details, see "File format" in the specification:
+// For details, see "File format" in the specification:
 // https://developers.google.com/search/reference/robots_txt#file-format
 package robots
 
