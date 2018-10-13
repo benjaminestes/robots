@@ -100,9 +100,16 @@ func (l *lexer) run() {
 	close(l.items)
 }
 
+func stripBOM(s string) string {
+	if r, w := utf8.DecodeRuneInString(s); r == '\ufeff' {
+		return s[w:]
+	}
+	return s
+}
+
 func lex(in string) []*item {
 	l := &lexer{
-		input: in,
+		input: stripBOM(in),
 		items: make(chan *item),
 	}
 	go l.run()

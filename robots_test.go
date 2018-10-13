@@ -14,6 +14,15 @@ func TestPathological(t *testing.T) {
 	if r.Test("Googlebot", "/exact-match") {
 		t.Errorf("googlebot shouldn't crawl /exact-match")
 	}
+	seen := false
+	for _, s := range r.Sitemaps {
+		if s == "http://www.example.com/sitemap.xml" {
+			seen = true
+		}
+	}
+	if !seen {
+		t.Errorf("didn't discover http://www.example.com/sitemap.xml")
+	}
 }
 
 func TestAgentPrecedence(t *testing.T) {
