@@ -12,15 +12,14 @@
 //
 // To get the right robots.txt file, use Locate. Locate takes as its
 // only argument the URL you want to access. It returns the URL of the
-// robots.txt file that governs access to it. Locate will always
-// return a single unique robots.txt location for all URLs sharing a
-// scope.
+// robots.txt file that governs access. Locate will always return a
+// single unique robots.txt URL for all input URLs sharing a scope.
 //
 // In practice, a client pattern for testing whether a URL is
 // accessible would be: a) Locate the robots.txt file for the URL; b)
-// Check whether you have fetched data for that robots.txt file; c) If
-// yes, use the data to Test the URL against your user agent. If no,
-// fetch the robots.txt data and try again.
+// check whether you have fetched data for that robots.txt file; c) if
+// yes, use the data to Test the URL against your user agent; d) if
+// no, fetch the robots.txt data and try again.
 //
 // For complete details, see "File location & range of validity" in
 // the specification:
