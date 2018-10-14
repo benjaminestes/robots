@@ -5,26 +5,6 @@ import (
 	"testing"
 )
 
-func TestPathological(t *testing.T) {
-	f, err := os.Open("testdata/pathological.txt")
-	if err != nil {
-		t.Errorf("%v", err)
-	}
-	r, _ := From(200, f)
-	if r.Test("Googlebot", "/exact-match") {
-		t.Errorf("googlebot shouldn't crawl /exact-match")
-	}
-	seen := false
-	for _, s := range r.Sitemaps() {
-		if s == "http://www.example.com/sitemap.xml" {
-			seen = true
-		}
-	}
-	if !seen {
-		t.Errorf("didn't discover http://www.example.com/sitemap.xml")
-	}
-}
-
 func TestAgentPrecedence(t *testing.T) {
 	fname := "testdata/agent_precedence.txt"
 	data, err := os.Open(fname)
@@ -239,6 +219,49 @@ func TestLocateCase(t *testing.T) {
 	for _, test := range tests {
 		if got, _ := Locate(test.input); got != test.want {
 			t.Errorf("Locate(%q) should be %v, got %v", test.input, test.want, got)
+		}
+	}
+}
+
+func TestPathological(t *testing.T) {
+	f, err := os.Open("testdata/pathological.txt")
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	r, _ := From(200, f)
+	if r.Test("Googlebot", "/exact-match") {
+		t.Errorf("googlebot shouldn't crawl /exact-match")
+	}
+	seen := false
+	for _, s := range r.Sitemaps() {
+		if s == "http://www.example.com/sitemap.xml" {
+			seen = true
+		}
+	}
+	if !seen {
+		t.Errorf("didn't discover http://www.example.com/sitemap.xml")
+	}
+}
+
+func TestRobotsAllow(t *testing.T) {
+	var tests = []struct {
+		status int
+		want   bool
+	}{
+		{200, true},
+		{301, true},
+		{404, true},
+		{503, false},
+	}
+
+	for _, test := range tests {
+		r, err := From(test.status, nil)
+		if err != nil {
+			t.Errorf("couldn't make Robots with status %d", test.status)
+		}
+		if got := r.Test("Crawlerbot", "/somepath"); got != test.want {
+			t.Errorf("%d status should default to %t, got %t",
+				test.status, test.want, got)
 		}
 	}
 }

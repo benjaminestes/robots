@@ -53,11 +53,19 @@ import (
 // rejected without failing. Therefore, From will only signal an error
 // condition if it fails to read from the input at all.
 func From(status int, in io.Reader) (*Robots, error) {
+	switch in.(type) {
+	case nil:
+		return makeRobots(status, nil), nil
+	}
+
 	buf, err := ioutil.ReadAll(in)
 	if err != nil {
 		return nil, err
 	}
-	data := parse(string(buf))
+	var data *robotsdata
+	if status >= 200 && status < 300 {
+		data = parse(string(buf))
+	}
 	return makeRobots(status, data), nil
 }
 

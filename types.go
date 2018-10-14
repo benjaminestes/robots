@@ -96,8 +96,8 @@ func (a *agent) compile() {
 	a.pattern = r
 }
 
-// Robots represents the result of parsing a robots.txt file. To test
-// whether an agent may crawl a path, use a Test* method. If any
+// robotsdata represents the result of parsing a robots.txt file. To
+// test whether an agent may crawl a path, use a Test* method. If any
 // sitemaps were discovered while parsing, the Sitemaps field will be
 // a slice containing their absolute URLs.
 type robotsdata struct {
@@ -110,12 +110,22 @@ type robotsdata struct {
 	sitemaps []string // Absolute URLs of sitemaps in robots.txt.
 }
 
+// Robots represents an object whose methods govern access to URLs
+// within the scope of a robots.txt file, and what sitemaps, if any,
+// have been discovered during parsing.
 type Robots struct {
-	allow bool
+	allow bool // default crawl setting
 	*robotsdata
 }
 
 func makeRobots(status int, data *robotsdata) *Robots {
+	if data == nil {
+		// If a nil data pointer is passed, just construct an
+		// empty data object. This avoids having to check for
+		// nil pointers while allowing for the possibility
+		// that there was actually no robots.txt data.
+		data = &robotsdata{}
+	}
 	r := &Robots{
 		robotsdata: data,
 	}
@@ -126,8 +136,10 @@ func makeRobots(status int, data *robotsdata) *Robots {
 func (r *Robots) setAllow(status int) {
 	if status >= 500 && status < 600 {
 		r.allow = false
+		return
 	}
 	r.allow = true
+	return
 }
 
 // bestAgent matches an agent string against all of the agents in
@@ -186,9 +198,9 @@ func (r *Robots) Test(name, rawurl string) bool {
 func (r *Robots) Tester(name string) func(rawurl string) bool {
 	agent, ok := r.bestAgent(name)
 	if !ok {
-		// An agent that isn't matched crawls everything.
+		// An agent that isn't matched uses default allow state.
 		return func(_ string) bool {
-			return true
+			return r.allow
 		}
 	}
 	return func(rawurl string) bool {
