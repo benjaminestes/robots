@@ -33,6 +33,18 @@
 //
 // For details, see "File format" in the specification:
 // https://developers.google.com/search/reference/robots_txt#file-format
+//
+// Handling status codes
+//
+// The specification states that a crawler will assume all URLs are
+// accessible, even if there is no robots.txt file, or the body of the
+// robots.txt file is empty.  So a robots.txt file with a 404 status
+// code will result in all URLs being crawlable.  The exception to
+// this is a 5xx status code. This is treated as a temporary "full
+// disallow" of crawling.
+//
+// For details, see "Handling HTTP result codes" in the specification:
+// https://developers.google.com/search/reference/robots_txt#handling-http-result-codes
 package robots
 
 import (
@@ -45,8 +57,11 @@ import (
 	"golang.org/x/net/idna"
 )
 
-// From produces a Robots object from a robots.txt file represented as
-// an io.Reader.
+// From produces a Robots object from an HTTP status code and a
+// robots.txt file represented as an io.Reader. The status code is
+// required; a nil value or empty io.Reader argument will be handled
+// gracefully. In that case, behavior will be determined solely by the
+// response status.
 //
 // The attitude of the specification is permissive concerning parser
 // errors: all valid input is accepted, and invalid input is silently
