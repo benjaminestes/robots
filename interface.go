@@ -58,8 +58,7 @@ func From(status int, in io.Reader) (*Robots, error) {
 		return nil, err
 	}
 	data := parse(string(buf))
-	r := &Robots{status, data}
-	return r, nil
+	return makeRobots(status, data), nil
 }
 
 // Locate takes a string representing an absolute URL and returns the

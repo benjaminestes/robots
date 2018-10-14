@@ -23,10 +23,10 @@ func ExampleRobots() {
 		// Handle error - couldn't read from input.
 	}
 
-	if r.Test("Googlebot", "/") {
+	if r.Test("Crawlerbot", "/") {
 		// You're good to crawl "/".
 	}
-	if r.Tester("Googlebot")("/page.html") {
+	if r.Tester("Crawlerbot")("/page.html") {
 		// You're good to crawl "/page.html".
 	}
 
@@ -39,7 +39,7 @@ func ExampleRobots() {
 			// Couldn't parse sitemap URL - probably we should skip.
 			continue
 		}
-		if sitemapRobotsURL == robotsURL && r.Test("Googlebot", sitemap) {
+		if sitemapRobotsURL == robotsURL && r.Test("Crawlerbot", sitemap) {
 			resp, err := http.Get(sitemap)
 			if err != nil {
 				// Handle error.

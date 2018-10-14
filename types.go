@@ -111,8 +111,53 @@ type robotsdata struct {
 }
 
 type Robots struct {
-	status int
+	allow bool
 	*robotsdata
+}
+
+func makeRobots(status int, data *robotsdata) *Robots {
+	r := &Robots{
+		robotsdata: data,
+	}
+	r.setAllow(status)
+	return r
+}
+
+func (r *Robots) setAllow(status int) {
+	if status >= 500 && status < 600 {
+		r.allow = false
+	}
+	r.allow = true
+}
+
+// bestAgent matches an agent string against all of the agents in
+// r. It returns a pointer to the best matching agent, and a boolen
+// indicating whether a match was found.
+func (r *Robots) bestAgent(name string) (*agent, bool) {
+	for _, agent := range r.agents {
+		if agent.match(name) {
+			return agent, true
+		}
+	}
+	return nil, false
+}
+
+// addAgents adds a slice of agents to that maintained by r.
+// This function accepts a slice because that is the common case:
+// the parser may generate multiple agent objects from a single
+// group of rules.
+func (r *robotsdata) addAgents(agents []*agent) {
+	for _, agent := range agents {
+		// Maintain type invariant: all contained agents
+		// must have patterns compiled before use.
+		agent.compile()
+	}
+	r.agents = append(r.agents, agents...)
+	// Maintain type invariant: r.agents must always be sorted
+	// by length of agent name, descending.
+	sort.Slice(r.agents, func(i, j int) bool {
+		return len(r.agents[i].name) > len(r.agents[j].name)
+	})
 }
 
 func (r *Robots) Sitemaps() []string {
@@ -157,36 +202,7 @@ func (r *Robots) Tester(name string) func(rawurl string) bool {
 				return member.allow
 			}
 		}
-		return true
+		// No applicable rule: return default robots allow state.
+		return r.allow
 	}
-}
-
-// addAgents adds a slice of agents to that maintained by r.
-// This function accepts a slice because that is the common case:
-// the parser may generate multiple agent objects from a single
-// group of rules.
-func (r *robotsdata) addAgents(agents []*agent) {
-	for _, agent := range agents {
-		// Maintain type invariant: all contained agents
-		// must have patterns compiled before use.
-		agent.compile()
-	}
-	r.agents = append(r.agents, agents...)
-	// Maintain type invariant: r.agents must always be sorted
-	// by length of agent name, descending.
-	sort.Slice(r.agents, func(i, j int) bool {
-		return len(r.agents[i].name) > len(r.agents[j].name)
-	})
-}
-
-// bestAgent matches an agent string against all of the agents in
-// r. It returns a pointer to the best matching agent, and a boolen
-// indicating whether a match was found.
-func (r *robotsdata) bestAgent(name string) (*agent, bool) {
-	for _, agent := range r.agents {
-		if agent.match(name) {
-			return agent, true
-		}
-	}
-	return nil, false
 }
