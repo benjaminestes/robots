@@ -26,7 +26,7 @@ func ExampleRobots() {
 	if r.Test("Googlebot", "/") {
 		// You're good to crawl "/".
 	}
-	if r.Tester("Gooblebot")("/page.html") {
+	if r.Tester("Googlebot")("/page.html") {
 		// You're good to crawl "/page.html".
 	}
 
