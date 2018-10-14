@@ -34,7 +34,7 @@
 // For details, see "File format" in the specification:
 // https://developers.google.com/search/reference/robots_txt#file-format
 //
-// Handling status codes
+// Effect of robots.txt status code
 //
 // The specification states that a crawler will assume all URLs are
 // accessible, even if there is no robots.txt file, or the body of the
