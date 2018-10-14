@@ -172,6 +172,9 @@ func (r *robotsdata) addAgents(agents []*agent) {
 	})
 }
 
+// Sitemaps returns a list of sitemap URLs dicovered during parsing.
+// The specification requires sitemap URLs in robots.txt files to be
+// absolute, but this is the responsibility of the robots.txt author.
 func (r *Robots) Sitemaps() []string {
 	// TODO: Does this need to be immutable?
 	return r.sitemaps
