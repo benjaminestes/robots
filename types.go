@@ -207,11 +207,10 @@ func (r *Robots) Tester(name string) func(rawurl string) bool {
 		}
 	}
 	return func(rawurl string) bool {
-		parsed, err := url.Parse(rawurl)
-		if err != nil {
-			return true
+		path, ok := robotsPath(rawurl)
+		if !ok {
+			return r.allow
 		}
-		path := parsed.Path
 		for _, member := range agent.group.members {
 			if member.match(path) {
 				return member.allow
@@ -220,4 +219,20 @@ func (r *Robots) Tester(name string) func(rawurl string) bool {
 		// No applicable rule: return default robots allow state.
 		return r.allow
 	}
+}
+
+// robotsPath returns the part of a URL that robots.txt will match
+// against.  This is the path, but also possibly a query string. The
+// Path field of a parsed URL won't contain the query, so we
+// concatenate it if it exists. It does not include a fragment.
+func robotsPath(rawurl string) (string, bool) {
+	parsed, err := url.Parse(rawurl)
+	if err != nil {
+		return "", false
+	}
+	path := parsed.Path
+	if parsed.RawQuery != "" {
+		path += "?" + parsed.RawQuery
+	}
+	return path, true
 }
