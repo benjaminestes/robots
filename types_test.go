@@ -7,6 +7,8 @@ func TestRobotsPath(t *testing.T) {
 		input string
 		want  string
 	}{
+		{"", "/"},
+		{"?q=123", "/?q=123"},
 		{"/page.html", "/page.html"},
 		{"/page.html#fragment", "/page.html"},
 		{"/page.html?q=123", "/page.html?q=123"},

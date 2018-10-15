@@ -231,6 +231,9 @@ func robotsPath(rawurl string) (string, bool) {
 		return "", false
 	}
 	path := parsed.Path
+	if path == "" {
+		path = "/"
+	}
 	if parsed.RawQuery != "" {
 		path += "?" + parsed.RawQuery
 	}
