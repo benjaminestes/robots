@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
-	"sort"
 	"strings"
 )
 
@@ -54,12 +53,20 @@ func (g *group) addMember(m *member) {
 	// Maintain type invariant: a member must have its pattern
 	// compiled before use.
 	m.compile()
-	g.members = append(g.members, m)
 	// Maintain type invariant: the members of a group must always
 	// be sorted by length of path, descending.
-	sort.Slice(g.members, func(i, j int) bool {
-		return len(g.members[i].path) > len(g.members[j].path)
-	})
+	g.members = insertMemberMaintainingOrder(g.members, m)
+}
+
+func insertMemberMaintainingOrder(a []*member, m *member) []*member {
+	a = append(a, m)
+	for i := len(a) - 1; i > 0; i-- {
+		if len(a[i].path) < len(a[i-1].path) {
+			return a
+		}
+		a[i], a[i-1] = a[i-1], a[i]
+	}
+	return a
 }
 
 // An agent represents a group of rules that a named robots agent
@@ -163,13 +170,21 @@ func (r *robotsdata) addAgents(agents []*agent) {
 		// Maintain type invariant: all contained agents
 		// must have patterns compiled before use.
 		agent.compile()
+		// Maintain type invariant: r.agents must always be
+		// sorted by length of agent name, descending.
+		r.agents = insertAgentMaintainingOrder(r.agents, agent)
 	}
-	r.agents = append(r.agents, agents...)
-	// Maintain type invariant: r.agents must always be sorted
-	// by length of agent name, descending.
-	sort.Slice(r.agents, func(i, j int) bool {
-		return len(r.agents[i].name) > len(r.agents[j].name)
-	})
+}
+
+func insertAgentMaintainingOrder(a []*agent, t *agent) []*agent {
+	a = append(a, t)
+	for i := len(a) - 1; i > 0; i-- {
+		if len(a[i].name) < len(a[i-1].name) {
+			return a
+		}
+		a[i], a[i-1] = a[i-1], a[i]
+	}
+	return a
 }
 
 // Sitemaps returns a list of sitemap URLs dicovered during parsing.
