@@ -1,5 +1,7 @@
 package robots
 
+import "strings"
+
 type parser struct {
 	agents      []*agent
 	withinGroup bool
@@ -67,6 +69,10 @@ func makeParseMember(allow bool) func(*parser) parsefn {
 		// any user-agent rules. That's fine, it results in
 		// the desired behavior.
 		p.withinGroup = true
+		// If there is no path, do nothing.
+		if strings.TrimSpace(p.items[0].val) == "" {
+			return parseNext
+		}
 		// If there is no agent (i.e., the rules come before
 		// any user-agent line), this just doesn't do
 		// anything.  That's what we want.
